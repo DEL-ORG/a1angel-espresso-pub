@@ -1,0 +1,122 @@
+# Default values for a1angel-espresso-review-v1.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+name: a1angel-espresso-review-v1
+name2: a1angel-espresso-review-v2
+labels:
+  app: a1angel-espresso-reviews
+  version: v1
+  version2: v2
+replicaCount: 1
+
+environment:
+  name: SERVICE_VERSION
+  value: v1
+  value2: v2
+
+image:
+  repository: devopseasylearning/a1angel-espresso-reviews
+  imagePullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v1.0.0"
+ports:
+    name: http
+    containerPort: 80
+    Protocol: TCP
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "espress-reviews-sa"
+  name2: "espress-reviews-2-sa"
+
+podDistruptionBudget:
+     name: a1angel-espresso-review-v1-pdb
+     name2: a1angel-espresso-review-v2-pdb
+     maxUnavailable: 1
+
+strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+      
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  name: espresso-shop-reviews-svc
+  type: NodePort
+  port: 8092
+  targetPort: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  name: espresso-review-v1-hpa
+  name2: espresso-review-v2-hpa
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 60
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+
+
+
+
+
+
+

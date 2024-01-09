@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ .Values.name2 }}
+  labels:
+    app: {{ .Values.labels.app }}
+    version: {{ .Values.labels.version2 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{- toYaml .Values.strategy | nindent 12 }}
+  selector:
+    matchLabels:
+       version: {{ .Values.labels.version2 }}
+  template:
+    metadata:
+      labels: 
+       version: {{ .Values.labels.version2 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name2 }}
+      containers:
+        - name: {{ .Values.name2 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env:
+            - name: {{ .Values.environment.name }}
+              value: {{ .Values.environment.value2 }}
+          ports:
+            - name: {{ .Values.ports.name }}
+              containerPort: {{ .Values.ports.containerPort }}
+              protocol:  {{ .Values.ports.Protocol }}
+          resources:
+             {{- toYaml .Values.resources | nindent 12 }}
+
+
+
+
+
+
+
+

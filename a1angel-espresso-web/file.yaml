@@ -1,0 +1,133 @@
+---
+# Source: a1angel-espresso-web/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: a1angel-espresso-web-pdb
+  labels:
+    app: a1angel-espresso-web 
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      version: v1
+---
+# Source: a1angel-espresso-web/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: espress-web-sa
+  labels:
+    app: a1angel-espresso-web
+---
+# Source: a1angel-espresso-web/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: espresso-web-secret
+  labels:
+    app: a1angel-espresso-web
+type: Opaque
+data:
+  password: UGJ0NFBeeHVlam0qWmZsIWs1ZmpiXm1YWFpPa2JHYw==
+---
+# Source: a1angel-espresso-web/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: espresso-web-cm
+  labels:
+    app: a1angel-espresso-web 
+data:
+    ProductCatalogUrl: "http://espresso-shop-product-catalog-svc:8091"
+    ReviewsUrl: "http://espresso-shop-reviews-svc:8092"
+---
+# Source: a1angel-espresso-web/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: espresso-web-svc
+  labels:
+    app: a1angel-espresso-web
+spec:
+  type: NodePort
+  ports:
+    - port: 8090
+      targetPort: 80
+      protocol: TCP
+      name: espresso-web-svc
+  selector:
+    app: a1angel-espresso-web
+---
+# Source: a1angel-espresso-web/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  a1angel-espresso-web
+  labels:
+    app: a1angel-espresso-web
+spec:
+  replicas: 1
+  strategy:
+            null
+  selector:
+    matchLabels:
+       app: a1angel-espresso-web
+       version: v1
+  template:
+    metadata:
+      labels: 
+       version: v1
+    spec:
+      serviceAccountName: espress-web-sa
+      containers:
+        - name: a1angel-espresso-web
+          image: "devopseasylearning/a1angel-espresso-web:v1.0.0"
+          envFrom:
+          - secretRef:
+               name: espresso-web-secret
+          env:
+          - name:  ProductCatalogUrl
+            valueFrom:
+             configMapKeyRef:
+               name: espresso-web-cm
+               key: ProductCatalogUrl 
+          - name:  ReviewsUrl
+            valueFrom:
+             configMapKeyRef:
+               name: espresso-web-cm
+               key: ReviewsUrl 
+          imagePullPolicy: 
+          ports:
+            - name: http
+              containerPort: 80
+              protocol:  
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+# Source: a1angel-espresso-web/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: espresso-web-hpa
+  labels:
+    app: a1angel-espresso-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: a1angel-espresso-web
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
