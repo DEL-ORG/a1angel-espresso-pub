@@ -28,17 +28,6 @@ spec:
                name: {{ .Values.secret.name }}
           - configMapRef:
                name: {{ .Values.configmap.name }}
-          #env:
-          #- name:  {{ .Values.configmap.key1 }}
-          #  valueFrom:
-          #   configMapKeyRef:
-          #     name: {{ .Values.configmap.name }}
-          #     key: ProductCatalogUrl 
-          #- name:  {{ .Values.configmap.key2 }}
-          #  valueFrom:
-          #   configMapKeyRef:
-          #     name: {{ .Values.configmap.name }}
-          #     key: ReviewsUrl 
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - name: {{ .Values.ports.name }}
